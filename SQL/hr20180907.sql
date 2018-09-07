@@ -229,3 +229,32 @@ insert into department values
 update department set dname='MARKETING'
 where deptno=310;
 select * from department;
+
+#1. customer 테이블을 아래와 같이 생성하세요.(단, CUSTOMER_ID PRIMARY KEY,name NOT NULL 조건, deptno는 dept테이블의 deptno를 참조하도록)
+CREATE table customer(
+CUSTOMER_ID number(7) PRIMARY KEY,
+NAME varchar2(25) NOT NULL,
+PHONE varchar2(25),
+ADDRESS varchar2(20),
+deptno number(4) 
+constraint FK_CUSTOMER references dept(deptno));
+desc customer;
+
+create unique index idxd_dept_name
+on department(dname);
+
+create index idx_stud_birthdate
+on student(birthdate);
+
+create index idx_stud_dno_grade
+on student(deptno,grade);
+
+create index fidx_stud_no_name on student(deptno desc,name ASC);
+
+create index uppercase_idx ON emp (UPPER(ename));
+
+create index idx_standard_weight ON student((height-100)*0.9);
+
+
+--set Autotrace 명령--SQL PLUS
+
