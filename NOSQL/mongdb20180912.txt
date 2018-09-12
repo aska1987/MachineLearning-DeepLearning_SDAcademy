@@ -1,0 +1,65 @@
+다이렉트 만들기
+mkdir c:\mdata
+
+mdata폴더를 db path로 설정하여 서버 실행 
+mongod -dbpath c:\mdata
+
+클라이언트에서 실행
+mongo
+
+만들어진 db보기
+show dbs
+
+test라는 db 생성
+use test
+
+db 상태 확인
+db.stats()
+
+save와 insert 차이
+insert: 동일한 값을 저장하려 하면 오류
+save: 기존의 데이터 위에 덮어씀(기존의 데이터가 있으면 기존의 데이터를 덮어씀
+
+#1. emp1 collection에 데이터3건을 입력
+eno 1101 fname JIMMY
+eno 1102 fname ADAM iname KROLL
+eno 1103 fname SMITH job CLERK
+
+db.emp1.insert({eno:1101,fname:'JIMMY'})
+db.emp1.insert({eno:1102,fname:'ADAM',iname:'KROLL'})
+db.emp1.insert({eno:1103,fname:'SMITH',job:'CLERK'})
+
+#2. 넣은거 확인
+db.emp1.find()
+
+$lt(=미만)
+$lte(=이하)
+$gt(=초과)
+$gte(=이상)
+$ne(=not equals)
+$and
+$or
+$in
+$nin(=not in)
+$exists
+
+db.scores.find({a:{'$in':[2,3,4]}});
+scores테이블에서 exam를 포함하는 것을 찾는다
+db.scores.find({exam:{$exists:true}}); 
+모든데이터에서 id를 제외하고 a와 exam를 보여준다
+db.scores.find({},{a:1,exam:1,_id:0});
+
+#1. users라는 collection에 데이터4건을 입력
+ use user
+ db.users.insert({name:'유관순',age:38})
+ db.users.insert({name:'이순신',age:49})
+ db.users.insert({name:'강감찬',age:34})
+ db.users.insert({name:'이이',age:50})
+#2. age가 38인 데이터를 출력
+ db.users.find({age:38})
+#3. age가 40보다 큰 데이터를 출력 ($gt)
+ db.users.find({age:{$gt:40}})
+#4. age가 35보다 많고 50보다 작은 데이터를 출력 ($and)
+ db.users.find({$and:[{age:{$gt:35}},{age:{$lt:50}}]})
+#5. age가 34이거나 50인 데이터를 출력($or)
+ db.users.find({$or:[{age:34},{age:50}]})
