@@ -1,0 +1,107 @@
+#1. smith라는 이름과 나이 30이라는 필드를 갖는 문서저장
+ db.person.insert({name:'smith',age:30})
+#2. jack이라는 이름과 나이 31이라는 필드를 갖는 문서 저장 및 person컬렉션 조회
+ db.person.insert({name:'jack',age:31})
+ db.person.find()
+#3. jack이라는 이름과 나이31이라는 필드를 갖는 문서 저장
+ db.person.insert({name:'jack',age:31})
+---> MongoDB는 문서의 중복성은 체크하지 않는다.
+#4. 이름이 jack이고 사는 도시가 뉴욕이고 회사이름이 'NY Times'인 문서 저장
+ db.person.insert({name:'jack',city:'NewYork',company:'NY Times'})
+#5. 이름이 tiger이고 취미가 movie,game인 문서 저장
+ db.person.insert({name:'tiger',favorites:['movie','game']})
+#6. 조회 조건으로 name필드 값이 tiger인 문서 조회
+ db.person.find({name:'tiger'})
+#7. name 필드 값이 jack인 문서 조회
+ db.person.find({name:'jack'})
+#8. name 필드 jack이고 city 필드의 값이 NewYork인 문서 조회
+ db.person.find({name:'jack',city:'NewYork'})
+#9. person 컬렉션에 age 35~40 까지인 10건의 데이터 삽입
+ db.person.insert({name:'jack5',age:35})
+ db.person.insert({name:'jack6',age:36})
+ db.person.insert({name:'jack7',age:37})
+ db.person.insert({name:'jack8',age:38})
+ db.person.insert({name:'jack9',age:39})
+ db.person.insert({name:'jack10',age:40})
+#10. age 필드값이 31보다 작은 문서 조회
+ db.person.find({age:{$lt:31}})
+#11. age 필드값이 31보다 작거나 같은 문서 조회
+ db.person.find({age:{$lte:31}})
+#12. age 필드 값이 37보다 큰 문서 조회
+ db.person.find({age:{$gt:37}})
+#13. age 필드 값이 37보다 크거나 같고 35보다 작거나 같은 문서조회
+ db.person.find({$and:[{age:{$gte:33}},{age:{$lte:35}}]})
+#14. age 필드를 제외하고 name 필드만 조회
+ db.person.find({},{age:0})
+#15. age는 33보다 작은사람중에서 age필드만 조회(_id 조회x)
+ db.person.find({age:{$lt:33}},{age:1,_id:0})
+
+데이터 삽입
+ db.users.save({name:'Johnny',languages:['ruby','c']});
+ db.users.save({name:'Sue',languages:['scala','lisp']});
+데이터 업데이트
+ db.users.update({name:'Johnny'},{name:'Cash',languages:['english']}); 
+ db.users.update({name:'Cash'},{'$set':{'age':50}}); name이Cash인 age 50을 삽입
+ db.users.update({name:'Cash'},{'$unset':{'age':50}}); name이Cash인 age 50을 삭제
+PULL
+ db.users.update({name:'Sue'},{'$pull':{'languages':'scala'}}); languages 컬럼의 scala 삭제
+PUSH
+ db.users.update({name:'Sue'},{'$push':{'languages':'ruby'}});
+DB삭제
+db.users.remove({}); 데이터 삭제
+db.users.drop(); 컬렉션 삭제
+db.getCollectionNames() 확인
+
+#100명에 대한 문서 삽입
+ for(var i=0; i<=100; i++){
+  db.users.insert({name:'name'+i,pos:i});
+ }
+#6<=pos<=27 or 77<=pos<=90 인 데이터 출력
+ db.users.find(({$or:[{pos:{$gte:6,$lte:27}},{pos:{$gt:77,$lte:90}}]}),{pos:0});
+
+#16. person 컬렉션에서 
+name값이 jack1인 문서를 찾아서 type필드 값이 student이고 major필드값이computer science인 문서로변경
+ db.person.update({name:'jack1'},{$set:{type:'student',major:'computer science'}})
+#17. 컬렉션 정보 조회
+ db.getCollectionNames()
+#18. users 컬렉션 삭제
+  db.users.drop();
+#19. name이 smith인 문서에서 age필드의 값을45로 변경
+ db.person.update({age:45},{name:'smith',age:45})
+#20. name이 jack인 문서에서 age필드의 값을 80으로변경
+ db.person.update({name:'jack'},{$set:{age:80}})  =>매칭되는 것 중 첫번째것만 수정
+#21. name이 jack인 문서에서 모든 문서에 대해서 age값을 99로 업데이트
+ db.person.updateMany({name:'jack'},{$set:{age:99}})
+
+UpdateOne, UpdateMany
+ updateOne은 매칭되는 다큐먼트 중 첫 번째만 수정하고, 
+ updateMany는 매칭되는 모든 다큐먼트를 수정 
+
+#22. name이 jack인 문서를 삭제
+ db.person.remove({name:'jack'})
+#23. person 컬렉션 데이터 삭제
+ db.person.remove({})
+
+인덱스 확인
+ db.person.getIndexes()
+인덱스 생성 (오름차순이면1, 내림차순이면 -1)
+ db.person.ensureIndex({name:1})
+ db.person.ensureIndex({name:1},{unique:true}) unique: 중복 데이터가 저장되지 못하도록 => 데이터저장과 검색속도를 높여줌
+ db.person.ensureIndex({name:1},{unique:true,dropDups:true}) dropDups: 이미 중복된 데이터가 있으면 삭제하고 인덱스 저장 기능
+인덱스 삭제
+ db.person.dropIndex({name:1})
+인덱스 유무에 따른 검색 속도 비교
+ for(i=0; i<1000000; i++){
+  db.users9.insert(
+  {
+   i:i,
+   username:'user'+i,
+   age: Math.floor(Math.random()*120),
+   creadted:new Date()}
+  );
+  }
+
+ db.users9.find({username: 'user101'}).explain()
+인덱스 생성
+ db.users.ensureIndex({username:1})
+ db.users9.find({username: 'user101'}).explain()
