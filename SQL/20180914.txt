@@ -1,0 +1,201 @@
+ desc s_emp;
+프로시져 생성
+ create or replace procedure up_credit
+    (v_id IN s_customer.id%TYPE,
+     v_credit IN s_customer.credit_rating%TYPE)
+     IS BEGIN
+      UPDATE s_customer
+      SET credit_rating=v_credit
+      WHERE id=v_id;
+     COMMIT;
+     END;
+    /
+
+ create or replace procedure del_ord
+    (v_ord_id s_item.ord_id%TYPE)
+    is
+    begin
+     delete from s_item
+     where ord_id=v_ord_id;
+    commit;
+    end;
+    /
+
+ create or replace procedure in_emp
+   (v_name IN s_emp.name%TYPE,
+    v_sal IN s_emp.salary%TYPE,
+    v_title IN s_emp.title%TYPE)
+    IS
+    BEGIN
+     insert into s_emp(id,name,salary,title,start_date)
+     values(s_emp_id.NEXTVAL,v_name,v_sal,v_title,SYSDATE);
+    END;
+    /
+
+프로시져 실행
+ EXECUTE up_credit(215,'우수')
+ EXECUTE up_credit(215,'불량')
+ EXECUTE del_ord(100)
+ EXECUTE in_emp('김희동',900,'사원');
+
+create or replace procedure show_emp
+    (v_id IN s_emp.id%TYPE)
+    IS
+     v_salary s_emp.salary%TYPE;
+     v_start_date s_emp.start_date%TYPE;
+    BEGIN
+    SELECT salary,start_date
+    INTO v_salary,v_start_date
+    FROM s_emp
+    WHERE id=v_id;
+    DBMS_OUTPUT.PUT_LINE('급여:'||TO_CHAR(v_salary,'9,999,999'));
+    DBMS_OUTPUT.PUT_LINE('입사일:'||TO_CHAR(v_start_date));
+    END;
+     /
+
+ set serverout on 프로시저 결과를 화면에 출력하고 싶을 때
+ execute show_emp(25)
+
+#교수번호를 조회하여 교수테이블에서 교수번호,이름,학과번호,급여를 검색하는 프로시저를 작성
+ create or replace procedure show_prof
+    (v_profno IN professor.profno%TYPE)
+    IS
+     v_name professor.name%TYPE;
+     v_deptno professor.deptno%TYPE;
+     v_sal professor.sal%TYPE;
+    BEGIN
+    SELECT name,deptno,sal
+    INTO v_name,v_deptno,v_sal
+    FROM professor
+    WHERE profno=v_profno;
+    DBMS_OUTPUT.PUT_LINE('교수번호:'||v_profno);
+    DBMS_OUTPUT.PUT_LINE('이름:'||v_name);
+    DBMS_OUTPUT.PUT_LINE('학과번호:'||v_deptno);
+    DBMS_OUTPUT.PUT_LINE('급여:'||v_sal);
+    END;
+    /
+
+ execute show_prof(9905)
+
+#S_EMP 테이블에서 사번을 입력받아 해당 사원의 업무가 영업이면 급여를10%인상하고, 그렇지 않으면5%인상시키는 프로시저 
+create or replace procedure up_emp
+     (v_id IN s_emp.id%TYPE)
+     is
+      v_title s_emp.title%TYPE;
+      v_pct NUMBER(2);
+     BEGIN
+      SELECT title
+      INTO v_title
+      FROM s_emp
+      WHERE id=v_id;
+      IF v_title LIKE '%영업%' THEN
+       v_pct:=10;
+      ELSE
+       v_PCT:=5;
+      END IF;
+     UPDATE s_emp
+     SET salary=salary+salary*v_pct/100
+     WHERE id=v_id;
+     COMMIT;
+     END;
+     /
+함수 생성
+ create or replace function tax
+    (v_id IN s_emp.id%TYPE)
+    RETURN NUMBER
+    IS
+     v_salary s_emp.salary%TYPE;
+    BEGIN
+     SELECT salary
+     INTO v_salary
+     FROM s_emp
+     WHERE id=v_id;
+     IF v_salary<1000 THEN
+      RETURN(v_salary*0.05);
+     ELSIF v_salary<2000 THEN
+      RETURN(v_salary*0.07);
+     ELSIF v_salary<3000 THEN
+      RETURN(v_salary*0.09);
+     ELSE
+      RETURN(v_salary*0.12);
+     END IF;
+    END;
+    /
+
+ VARIABLE a NUMBER ->a를 NUMBER변수로 선언
+ EXECUTE :a:=tax(1) ->1번 사원의 세금을 a에
+ PRINT a ->a 출력
+
+ select id,name,salary,TAX(id)
+ from s_emp;
+
+
+create or replace procedure show_emp
+    (v_salary IN s_emp.salary%type)
+    IS
+    v_name s_emp.name%TYPE;
+    v_sal s_emp.salary%TYPE;
+    v_title s_emp.title%TYPE;
+    BEGIN
+    SELECT name,salary,title
+    INTO v_name,v_sal,v_title
+    FROM s_emp
+    WHERE salary =v_salary;
+    DBMS_OUTPUT.PUT_LINE('이름'||'급여'||'직책');
+    DBMS_OUTPUT.PUT_LINE('--------------------------');
+    DBMS_OUTPUT.PUT_LINE(v_name||v_sal||v_title);
+    END;
+    /
+
+ set serverout on
+ execute show_emp(5000) ->정상 출력
+ execute show_emp(2400) ->오류 (sal이 2400인 사람이 2명이라서)
+
+ create or replace procedure show_emp
+   (v_salary IN s_emp.salary%type)
+   IS
+   v_name s_emp.name%TYPE;
+   v_sal s_emp.salary%TYPE;
+   v_title s_emp.title%TYPE;
+   BEGIN
+   SELECT name,salary,title
+   INTO v_name,v_sal,v_title
+   FROM s_emp
+   WHERE salary =v_salary;
+   DBMS_OUTPUT.PUT_LINE('이름'||'급여'||'직책');
+   DBMS_OUTPUT.PUT_LINE('--------------------------');
+   DBMS_OUTPUT.PUT_LINE(v_name||v_sal||v_title);
+   EXCEPTION
+   WHEN NO_DATA_FOUND THEN
+   DBMS_OUTPUT.PUT_LINE('ERROR!-해당급여를 받는 사원은 없습니다.');
+   WHEN TOO_MANY_ROWS THEN
+   DBMS_OUTPUT.PUT_LINE('ERROR!- 해당급여를 받는사람이 많습니다.');
+   END;
+   /
+
+ execute show_emp(2400) ->예외처리에 걸러짐
+
+create or replace procedure show_ordtotal
+   (v_ord_id IN s_item.ord_id%TYPE)
+   IS
+    v_product_id s_item.product_id%TYPE;
+    v_item_total NUMBER(11,2);
+    v_total NUMBER(11,2) :=0;
+    CURSOR ordtotal_cursor IS    -->커서 선언
+    SELECT product_id,price*quantity
+    FROM s_item
+    WHERE ord_id=v_ord_id;
+   BEGIN
+    OPEN ordtotal_cursor;		-->커서 오픈
+    LOOP
+     FETCH ordtotal_cursor INTO v_product_id,v_item_total;	--> 커서FETCH
+     EXIT WHEN ordtotal_cursor%NOTFOUND;
+     DBMS_OUTPUT.PUT_LINE(TO_CHAR(v_product_id,'9999999')|| ' '||TO_CHAR(v_item_total,'9,999,999'));
+     v_total :=v_total+v_item_total;
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('총금액: '||TO_CHAR(v_total,'999,999,999,99'));
+    CLOSE ordtotal_cursor;		-->커서 CLOSE
+   END;
+   /
+
+ EXECUTE show_ordtotal(109);
