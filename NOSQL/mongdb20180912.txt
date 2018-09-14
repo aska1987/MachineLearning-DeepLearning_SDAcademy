@@ -2,10 +2,10 @@
 mkdir c:\mdata
 
 mdata폴더를 db path로 설정하여 서버 실행 
-mongod -dbpath c:\mdata
+C:\Program Files\MongoDB\Server\4.0\bin>mongod -dbpath c:\mdata
 
 클라이언트에서 실행
-mongo
+C:\Program Files\MongoDB\Server\4.0\bin>mongo
 
 만들어진 db보기
 show dbs
@@ -63,3 +63,14 @@ db.scores.find({},{a:1,exam:1,_id:0});
  db.users.find({$and:[{age:{$gt:35}},{age:{$lt:50}}]})
 #5. age가 34이거나 50인 데이터를 출력($or)
  db.users.find({$or:[{age:34},{age:50}]})
+
+MongoDB 인스턴스 종료
+ db.shutdownServer()
+ 
+ exit
+
+MongoDB에 접속된 클라이언트 프로그램에서 Logout 하는 방법
+MongoDB 인스턴스 활성화
+ mongod --dbpath c:\mdata
+접속만 해제된 상태
+ db.logout()

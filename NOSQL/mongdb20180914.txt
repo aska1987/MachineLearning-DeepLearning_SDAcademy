@@ -1,0 +1,29 @@
+
+
+#슬레이브 저장공간 생성
+ C:\Program Files\MongoDB\Server\4.0\bin>mkdir c:\mdata2
+ C:\Program Files\MongoDB\Server\4.0\bin>mkdir c:\mdata3
+
+#서버 실행
+C:\Program Files\MongoDB\Server\4.0\bin>mongod -dbpath c:\mdata -port 1000 -master
+
+#슬레이브 실행
+C:\Program Files\MongoDB\Server\4.0\bin>mongod -dbpath c:\mdata2 -port 1001 -slave -source localhost:1000
+C:\Program Files\MongoDB\Server\4.0\bin>mongod -dbpath c:\mdata3 -port 1002 -slave -source localhost:1000
+
+mongo localhost:1000
+show dbs; 
+use test;
+db.users.drop();
+db.users.insert({name:'Shin',phone:'101-666-7777'});
+db.users.find();
+
+mongo localhost:1001
+show dbs;  ->오류
+use test;
+db.users.find()
+db.users.insert({name:'Park'}) ->오류
+
+mongo localhost:1002
+use test;
+db.users.find() 
