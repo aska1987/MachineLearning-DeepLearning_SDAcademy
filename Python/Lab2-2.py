@@ -25,6 +25,22 @@ for i in listData:
     if i>maxValue:
         maxValue=i
 maxValue
+#Investment Program
+Capital=float(input('Enter the investment amount: '))
+years=int(input('Enter the number of years: '))
+rate=float(input('Enter the rate as a %: '))
+
+if Capital>0 and years>0 and rate>0:
+    initialC=Capital
+    print('Year /Starting balance /Interest /Ending balance')
+    for i in range(1,years+1):
+        print('%d     %.2f \t \t %.2f   %.2f' %(i,Capital,Capital*(rate/100),Capital+Capital*(rate/100)))
+        Capital+=Capital*(rate/100)
+        if i==(years):
+            print('Ending balance: $%.2f' %Capital)
+            print('Total interest earned : $%.2f' %(Capital-initialC))
+else:
+    print('enter is invalid')
 
 a = 33
 b = 200

@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep 21 16:55:40 2018
+
+@author: SDEDU
+"""
+
+The program uses a simplified form of compound interest,
+in which the interest is computed once each year and
+added to the total amount invested. The output of the
+program is a report in tabular form that shows, for each
+year in the term of the investment, the year number, the
+initial balance in the account, the interest earned for that
+year, and the ending balance for that year. The columns of
+the table are suitably labeled with a header in the first row.
+Following the output of the table, the program prints the
+total amount of the investment balance and the total
+amount of interest earned for the period.
