@@ -18,7 +18,7 @@ array_1d=array_file[:,0]
 array_1d-array_1d[0]
 #Calculate the average of the sensor readings
 array_2d=array_file[:,1:5]
-array_var=np.var(array_2d,axis=1)
+array_var=np.mean(array_2d,axis=1)
 len(array_var)
 len(array_1d)
 len(array_2d)
@@ -49,21 +49,33 @@ data
 #dataset
 data_gender=data[:,1]
 data_gender
+data_gender= data_gender==1
+np.count_nonzero(data_gender)
+    
+
 #Compute the overall mean for Temperature and
 #HeartRate
 data_TH=data[:,[0,2]]
 data_TH
-data_avg=np.var(data_TH,axis=0)
+data_avg=np.mean(data_TH,axis=0)
 data_avg
 #Compute the mean, max and min of Temperature 
 #and HeartRate for Male and Females separately
 #and write the results on the file
 #BodyTemperature_results.txt in a table format.
-np.var((data[:,1==1]),axis=0)
-np.max((data[:,1==1]),axis=0)
-np.min((data[:,1==1]),axis=0)
-np.var((data[:,1==0]),axis=0)
-np.max((data[:,1==0]),axis=0)
-np.min((data[:,1==0]),axis=0)
 
+data[:,1]==1
+M_mean=(np.mean(data[(data[:,1]==1)],axis=0))
+
+M_max=np.max(data[(data[:,1]==1)],axis=0)
+M_min=np.min(data[(data[:,1]==1)],axis=0)
+W_mean=np.mean(data[(data[:,1]==2)],axis=0)
+W_max=np.max(data[(data[:,1]==2)],axis=0)
+W_min=np.min(data[(data[:,1]==2)],axis=0)
+result=np.vstack([M_mean,M_max,M_min,W_mean,W_max,W_min])
+result
+np.savetxt('BodyTemperature_results.txt',result,delimiter=',')
 #Normalize Temperature to 0-1 range
+tf_max=np.max(data[:,0],axis=0)
+tf_min=np.min(data[:,0],axis=0)
+(data[:,0]-tf_min)/(tf_max-tf_min)

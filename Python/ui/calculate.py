@@ -94,9 +94,10 @@ class Ui_calculator(object):
         self.btn_multi.clicked.connect(self.btn_multi_clicked)
         self.btn_divide.clicked.connect(self.btn_divide_clicked)
         self.btn_cal.clicked.connect(self.btn_cal_clicked)
+###마우스 클릭 이벤트
 ##연산자 버튼
     def btn_add_clicked(self):
-        if self.str_firstNum=='' and self.operator==False:
+        if self.str_firstNum=='' and self.operTF==False:
             pass
         else:
             self.operator='+'
@@ -105,7 +106,7 @@ class Ui_calculator(object):
             self.str_firstNum+=self.operator
             self.result.setText(self.str_firstNum)
     def btn_minus_clicked(self):
-        if self.str_firstNum=='' and self.operator==False:
+        if self.str_firstNum=='' and self.operTF==False:
             pass
         else:
             self.operator='-'
@@ -114,7 +115,7 @@ class Ui_calculator(object):
             self.str_firstNum+=self.operator
             self.result.setText(self.str_firstNum)            
     def btn_multi_clicked(self):
-        if self.str_firstNum=='' and self.operator==False:
+        if self.str_firstNum=='' and self.operTF==False:
             pass
         else:
             self.operator='*'
@@ -123,7 +124,7 @@ class Ui_calculator(object):
             self.str_firstNum+=self.operator
             self.result.setText(self.str_firstNum)
     def btn_divide_clicked(self):
-        if self.str_firstNum=='' and self.operator==False:
+        if self.str_firstNum=='' and self.operTF==False:
             pass
         else:
             self.operator='/'
@@ -293,7 +294,10 @@ class Ui_calculator(object):
             self.str_firstNum=""
             self.str_secondNum=""
             self.operTF=False
-            
+#키보드 클릭 이벤트
+#    def keyPressEvent(self,e):
+#        if e.key()==Qt.key_1:
+#            btn1_clicked(self)
     
     def retranslateUi(self, calculator):
         _translate = QtCore.QCoreApplication.translate
