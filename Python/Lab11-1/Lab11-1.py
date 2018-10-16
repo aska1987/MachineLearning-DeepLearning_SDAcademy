@@ -100,10 +100,11 @@ df['TotalIncome_log']=np.log(df.TotalIncome)
 
 #encoding
 #한 컬럼씩 변경
+b=df.describe()
 a=df.describe(include='all')
 dummies=pd.get_dummies(df.Gender)
 df=pd.concat([df,dummies],axis=1)
-df=df.drop(['Gender','male'],axis=1)
+df=df.drop(['Gender','Male'],axis=1)
 # 0 - male, 1 - female
 from sklearn.preprocessing import LabelEncoder
 le=LabelEncoder()
