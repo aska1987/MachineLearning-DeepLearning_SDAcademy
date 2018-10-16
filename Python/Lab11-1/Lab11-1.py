@@ -54,7 +54,7 @@ df.LoanAmount=df.LoanAmount.fillna(df.LoanAmount.mean())
 # = df.LoanAmount.fillna(df.LoanAmount.mean(),inplace=True)
  #범주형 변수
 df.Gender.value_counts()
-df.Gender.fillna('male',inplace=True)
+df.Gender.fillna('Male',inplace=True)
 # = df.Gender[df.Gender.isnull()==True]='Male'
 
 #Married
