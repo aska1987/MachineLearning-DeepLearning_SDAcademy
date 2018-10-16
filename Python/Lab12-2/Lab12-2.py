@@ -59,7 +59,6 @@ df_desc=df.describe()
 df.hist(bins=50)
 #boxplot
 df.boxplot()
-#
 #Correlation matrix
 df.corr()
 plt.matshow(df.corr())
@@ -70,19 +69,59 @@ plt.scatter(df.LSTAT,df.PRICE)
 plt.scatter(df.RM,df.PRICE)
 #scatter_matrix
 pd.scatter_matrix(df)
+
 #regression model ( y = ax )
 import statsmodels.api as sm
-model=sm.OLS(y,x).fit()
-predictions=model.predict(x)
+x=df.RM
+y=df.PRICE
+model=sm.OLS(y,x).fit() #모델 생성
+predictions=model.predict(x) #모델 예측
 model.summary()
 
-#regression model with y-intercept(y 절편) (y = ax + b)
+#regression model with one variable (y-intercept)(y 절편) (y = ax + b)
 x=sm.add_constant(x) #기존의 x값에다 constant 대입
 model=sm.OLS(y,x).fit()
 predictions=model.predict(x)
 model.summary()
 
 #regression model with RM
+#regression model with multiple variables
+df.columns
+x=df[['RM','LSTAT']]
+y=df.PRICE
+x=sm.add_constant(x)
+model=sm.OLS(y,x).fit()
+model.summary()
+
+#regression model using sklearn
+from sklearn.linear_model import LinearRegression
+x=boston.data
+y=boston.target
+
+lm=LinearRegression()
+model=lm.fit(x,y) # OLS는 y,x LinearRegression는 x,y 순서
+y_pred=model.predict(x)
+model.coef_
+model.intercept_
+model.score(x,y) #정확도
+
+#RM to PRICE
+x=df.RM.values.reshape(-1,1) #array로 변환(= .values)
+y=df.PRICE.values.reshape(-1,1)
+model=lm.fit(x,y)
+y_pred=model.predict(x)
+model.coef_
+model.intercept_
+model.score(x,y)
+
+#RM, LSTAT to PRICE
+x=df[['RM','LSTAT']]
+y=df.PRICE
+model=lm.fit(x,y)
+y_pred=model.predict(x)
+model.coef_
+model.intercept_
+model.score(x,y)
 
 #regression model with y-intercept and RM
 x=sm.add_constant(x)
