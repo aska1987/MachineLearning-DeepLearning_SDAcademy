@@ -228,35 +228,4 @@ plt.plot(ts.values, label='sales')
 plt.plot(ts_pred.values, label='sales prediction')
 plt.legend()
 
-#seasonal decomposition exercise with us census data
-#souvenior sales example
-souvenior=pd.read_csv('https://robjhyndman.com/tsdldata/data/fancy.dat',
-                      header=None)
-souvenior.index=pd.date_range('1987-12','1994-12',freq='M')# 1987년 12월 부터 1994년 11월 까지
-souvenior.columns=['sales']
-ts=souvenior.sales
-plt.plot(ts)
-souvenior_log=np.log(ts)
-plt.plot(souvenior_log)
 
-from statsmodels.tsa.seasonal import seasonal_decompose
-decom=seasonal_decompose(souvenior_log)
-seasonal=decom.seasonal
-souvenior_adj=souvenior_log-seasonal
-
-t=np.arange(1,85)
-import statsmodels.api as sm
-t=sm.add_constant(t)
-model=sm.OLS(souvenior_adj,t).fit()
-model.summary()
-souvenior_adj_trend=8.2636+0.0225*t
-souvenior_adj_trend=model.predict(t)
-souvnior_log_pred=souvenior_adj_trend+seasonal
-souvnior_pred=np.exp(souvnior_log_pred)
-
-plt.plot(ts)
-plt.plot(souvenior_log)
-plt.plot(souvenior_adj)
-plt.plot(souvenior_adj_trend)
-plt.plot(souvnior_log_pred)
-plt.plot(souvnior_pred)
