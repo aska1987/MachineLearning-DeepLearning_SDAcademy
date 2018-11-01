@@ -84,3 +84,12 @@ df.Item_Weight.fillna(a[df.Item_Identifier])
 df['Item_Weight']=df.groupby(by='Item_Identifier').transform(lambda x:x.fillna(x.median()))
 a=df.groupby(by='Item_Identifier').median()
 df['Year']=2018 - df.Outlet_Establishment_Year
+
+
+#encoding 
+#Item_Fat_Content
+#Outlet_Size
+#Outlet_Location_Type
+#Outlet_Type
+#Item_Type
+
