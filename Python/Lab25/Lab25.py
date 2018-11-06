@@ -123,21 +123,27 @@ plt.axis('off')
 #1. 영문 키워드 분석해서 워드클라우드 만들기
 import pandas as pd
 import numpy as np
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import nltk
+from konlpy.corpus import kobill
+
 calumn1=pd.read_excel('칼럼(2012-2014).XLS',sheet_name='2014년')
 calumn2=pd.read_excel('칼럼(2012-2014).XLS',sheet_name='2013년')
 calumn3=pd.read_excel('칼럼(2012-2014).XLS',sheet_name='2012년')
 
-calumn=pd.concat([calumn3,calumn1,calumn2])\
+#인덱스번호 안겹치게 순차적으로 하기 위해서
+calumn4=pd.concat([calumn3,calumn1,calumn2],axis=0,ignore_index=True) 
 
-calumn{}
-calumn.shape
-calumn.columns
-calumn['영문키워드']
-df=calumn['영문키워드']
+calumn4=calumn4.replace(' ',np.nan) #빈칸 nan로 처리
+cal.isnull().sum()
+df=calumn4['영문키워드']
+df=df.dropna()
+df.index=pd.RangeIndex(len(df.index)) #인덱스 0부터 순서대로 설정
 
 df_list=[]
-for i in range(0,len(a)):
-    df_list.append(a[i].split(';'))
+for i in range(0,len(df)):
+    df_list.append(df[i].split(';'))
 df_list
 df_str=''
 for i in range(0,len(df_list)):
@@ -153,8 +159,11 @@ plt.axis('off')
 
 
 #2. 한글 키워드 분석해서 워드클라우드 작성
-#2014
-hangle=calumn['국문키워드']
+
+hangle=calumn4['국문키워드']
+hangle.shape
+hangle=hangle.dropna()
+hangle.index=pd.RangeIndex(len(hangle.index))
 hangle_list=[]
 for i in range(0,len(hangle)):
     hangle_list.append(hangle[i].split(';'))
@@ -169,11 +178,11 @@ from konlpy.tag import Twitter
 t=Twitter()
 tokens_ko=t.nouns(hangle_str)
 tokens_ko
-ko_2014=nltk.Text(tokens_ko,name='2014년 한글분석')
+ko=nltk.Text(tokens_ko,name='한글분석')
 plt.figure(figsize=(12,6))
-ko_2014.plot(50)
+ko.plot(50)
 
-data=ko_2014.vocab().most_common(150)
+data=ko.vocab().most_common(150)
 
 wordcloud = WordCloud(font_path='c:\\Windows\\Fonts\\malgun.ttf',
                       relative_scaling = 0.2,
@@ -184,4 +193,48 @@ plt.figure(figsize=(12,8))
 plt.imshow(wordcloud)
 plt.axis('off')
 
+import numpy as np
+import matplotlib.pylab as plt
 
+def step_function(x):
+    return np.array(x>0,dtype=np.int)
+
+x=np.arange(-5.0,5.0,0.1)
+y=step_function(x)
+plt.plot(x,y) #직선
+plt.ylim(-0.1,1.1)
+
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
+
+x=np.array([-1.0,1.0,2.0])
+sigmoid(x)
+
+x=np.arange(-5.0,5.0,0.1)
+y=sigmoid(x)
+plt.plot(x,y) #곡선으로
+plt.ylim(-0.1,1.1)
+
+x=np.arange(-5.0,5.0,0.1)
+y1=sigmoid(x)
+y2=step_function(x)
+
+#계단형 시그모이드 비교(선형 비선형) 
+plt.plot(x,y1,label='sigmoid')
+plt.plot(x,y2,linestyle='--',label='step_function')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.ylim(-0.1,1.1)
+
+A=np.array([[1,2],[3,4]])
+print(A.shape)
+B=np.array([[5,6],[7,8]])
+print(B.shape)
+np.dot(A,B) #곱 (내적)
+
+x=np.array([1,2])
+print(x.shape)
+w=np.array([[1,3,5],[2,4,6]])
+ww.shape
+y=np.dot(x,w)
+y
