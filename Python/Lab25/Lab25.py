@@ -19,6 +19,7 @@ stopwords & punkt 다운
 
 데이터 전처리 및 파이썬 자연어 처리 라이브러리 정리
 http://aileen93.tistory.com/128
+
 '''
 
 from konlpy.tag import Kkma
