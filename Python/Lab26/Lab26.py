@@ -351,3 +351,60 @@ pinkwink_web.head()
 
 pinkwink_web['hit'].plot(figsize=(12,4),grid=True)
 
+time=np.arange(0,len(pinkwink_web))
+traffic=pinkwink_web['hit'].values
+fx=np.linspace(0,time[-1],1000)
+
+def error(f,x,y):
+    return np.sqrt(np.mean((f(x)-y)**2))
+#polyfit() 함수는 입력과 출력 값으로부터 다항식의 계수를 찾아주는 함수
+#p=ployfit(x,y,n) x: 다항식의 입력값, y: 다항식의 결과값, n: 차수, p: 차수에 따른 다항식의 계수값
+fp1=np.polyfit(time,traffic,1)
+f1=np.poly1d(fp1)
+f2p=np.polyfit(time,traffic,2)
+f2=np.poly1d(f2p)
+f3p=np.polyfit(time,traffic,3)
+f3=np.poly1d(f3p)
+f15p=np.polyfit(time,traffic,15)
+f15=np.poly1d(f15p)
+
+error(f1,time,traffic)
+error(f2,time,traffic)
+error(f3,time,traffic)
+error(f15,time,traffic)
+
+plt.figure(figsize=(10,6))
+plt.scatter(time,traffic,s=10)
+plt.plot(fx,f1(fx),lw=4,label='f1')
+plt.plot(fx,f2(fx),lw=4,label='f2')
+plt.plot(fx,f3(fx),lw=4,label='f3')
+plt.plot(fx,f15(fx),lw=4,label='f15')
+
+plt.grid(True, linestyle='-',color='0.75')
+plt.legend(loc=2)
+
+df=pd.DataFrame({'ds':pinkwink_web.index, 'y':pinkwink_web['hit']})
+df.reset_index(inplace=True)
+df['ds']=pd.to_datetime(df['ds'], format='%y. %m. %d.')
+del df['date']
+m=Prophet(yearly_seasonality=True,daily_seasonality=True)
+m.fit(df)
+future=m.make_future_dataframe(periods=60)
+future.tail()
+
+forecast=m.predict(future)
+forecast[['ds','yhat','yhat_lower','yhat_upper']].tail()
+m.plot(forecast)
+
+m.plot_components(forecast)
+
+from pandas_datareader import data
+#(base) C:\Users\SDEDU>pip install fix_yahoo_finance
+import fix_yahoo_finance as yf
+yf.pdr_override()
+start_date='1990-1-1'
+end_date='2017-6-30'
+KIA=data.get_data_yahoo('000270.KS',start_date,end_date)
+KIA.head()
+
+KIA['Close'].plot()
