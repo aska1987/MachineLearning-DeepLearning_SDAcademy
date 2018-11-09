@@ -207,7 +207,12 @@ from konlpy.tag import Twitter
 from collections import Counter
 from matplotlib import font_manager,rc
 from fbprophet import Prophet
-data=pd.read_excel('사이트방문자수(2012-2014).xls')
+data1=pd.read_excel('사이트방문자수(2012-2014).xls',sheet_name='2014년')
+data2=pd.read_excel('사이트방문자수(2012-2014).xls',sheet_name='2013년')
+data3=pd.read_excel('사이트방문자수(2012-2014).xls',sheet_name='2012년')
+data=pd.concat([data1,data2,data3],axis=0,ignore_index=True)
+
+
 data_title=data['제목']
 title_str=''
 for i in range(0,len(data_title)):
