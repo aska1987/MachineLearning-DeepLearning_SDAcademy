@@ -64,11 +64,25 @@ model.compile(
 
 #6.데이터 훈련
 hist=model.fit(x_train,y_train)
+hist=model.fit(x_train,y_train,
+               batch_size=100,
+               epochs=5,
+               validation_data=(x_test,y_test))
 
 #7.테스트데이터로 평가하기
 score=model.evaluate(x_test,y_test,verbose=1)
 print('lose=',score[0])
 print('accuracy=',score[1])
+
+from keraspp.skeras import plot_loss, plot_acc
+import matplotlib.pyplot as plt
+import numpy as np
+y_loss=hist.history['loss']
+x_len=np.arange(len(y_loss))
+y_vloss=hist.history['val_loss']
+plt.plot(x_len,y_loss,c='red',label='Testset_loss')
+plt.plot(x_len,y_vloss,c='blue',label='Trainaset_loss')
+
 
 #BMI
 import random
@@ -119,15 +133,20 @@ x_train,x_test=train_test_split(x,test_size=0.2)
 y_train,y_test=train_test_split(y,test_size=0.2)
 
 #모델 구조 정의
-#sequential model: 레이어들을 선형으로 쌓는 모델
+'''
+sequential model: 레이어들을 선형으로 쌓는 모델
+dropout: 은닉층에 배치된 노드 중 일부를 임의로 꺼두는 것
+랜덤하게 노드를 끔으로써 학습 데이터에 지나치게 치우쳐서 학습되는 과적합을 방지(퍼센트로 나타냄)
+https://tykimos.github.io/DeepBrick/
+'''
 model=Sequential()
-model.add(Dense(512,input_shape=(2,))) #입력 2, 출력 512
+model.add(Dense(512,input_shape=(2,))) #입력 2(x의 컬럼이 2개뿐), 출력 512
 model.add(Activation('relu'))
-model.add(Dropout(0,1))
+model.add(Dropout(0.1)) # 10% 제외
 model.add(Dense(512)) #입력 512(이전 레이어 입력), 출력 512
 model.add(Activation('relu'))
-model.add(Dropout(0,1))
-model.add(Dense(3)) #입력512(이전 레이어 입력), 출력 3
+model.add(Dropout(0.1))
+model.add(Dense(3)) #입력512(이전 레이어 입력), 출력 3(y의 컬럼이 3개)
 model.add(Activation('softmax'))
 
 #모델 구축하기
