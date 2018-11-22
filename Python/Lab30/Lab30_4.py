@@ -23,7 +23,7 @@ def create_dataset(dataset,look_back=1):
     return np.array(dataX),np.array(dataY)
 
 np.random.seed(7)
-data=pd.read_csv('international-airline-passengers.csv',usecols=[1])
+data1=pd.read_csv('international-airline-passengers.csv',usecols=[1])
 data=data[:144]
 dataset=data.values
 dataset=dataset.astype('float32')
