@@ -1,0 +1,6 @@
+In this paper, the effect of time difference of arrival (TDoA) is investigated for distributed nodes in OFDMA-based wireless
+mesh networks (WMNs). In order to minimize the interferences caused by TDoA in WMNs, the optimal starting point of FFT
+window at the receiver side of a node is derived by maximizing the effective SINR for each subcarrier. Also, a signal detection
+technique, called two dimensional ordered successive interference cancellation (TD-OSIC), is proposed for WMNs with
+TDoAs. It was shown via simulation that the proposed technique can achieve effective SINR and BER performances similar
+to the ideal case (no TDoA), even in WMNs with large TDoAs.
