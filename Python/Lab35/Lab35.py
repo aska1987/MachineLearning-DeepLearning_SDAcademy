@@ -57,7 +57,11 @@ classifier.show_most_informative_features()
 # -->ex) me 가 없을 때 'pos'가 나타날 확률은 'neg' 보다 1.7 배 더 높다
 
 test_sentence='i like MeRui'
-teset_sent_features={word.lower():}
+test_sent_features={word.lower():
+    (word in word_tokenize(test_sentence.lower()))
+    for word in all_words}
+test_sent_features
+classifier.classify(test_sent_features)
 
 
 from konlpy.tag import Twitter
