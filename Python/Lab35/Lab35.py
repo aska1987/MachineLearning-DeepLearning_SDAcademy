@@ -46,7 +46,7 @@ train=[('i like you','pos'),
        ('i like her','pos')]
 all_words=set(word.lower() for sentence in train
               for word in word_tokenize(sentence[0]))
-all_words
+all_words #말뭉치
 
 t=[({word:(word in word_tokenize(x[0])) for word in all_words},x[1])
 for x in train]
