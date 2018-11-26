@@ -9,6 +9,7 @@ Created on Fri Nov 23 09:41:44 2018
 교차 검증
 훈련세트와 테스트세트로 한번나누는것보다 더 안정적이고 뛰어난 통계적 평가 방법
 단점: 모델 k개를 만들어야 하므로 k배 느려짐
+
 '''
 from sklearn.datasets import make_blobs
 from sklearn.linear_model import LogisticRegression
@@ -37,6 +38,11 @@ scores #교차검증 점수
 cross_val_score(logreg,iris.data,iris.target,cv=5)
 cross_val_score(logreg,iris.data,iris.target,cv=5).mean() #교차검증 평균점수
 
+
+'''
+KoNLPy : 한국어 자연어처리 위한 대표적인 라이브러리
+NLTK : 영어로된 텍스트의 자연어처리를 위한 대표적인 라이브러리
+'''
 
 ## Naive Bayes Classifier  #######################
 #영어
