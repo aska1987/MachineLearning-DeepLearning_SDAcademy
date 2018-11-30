@@ -10,6 +10,7 @@ from urllib.request import urlopen
 import pandas as pd
 from urllib.parse import urljoin 
 import re
+import pandas as pd
 #1. 2017년 5월 1일 - 100일간 평점이 가장 좋은 1-5위 영화는?
 
 dt_index = pd.date_range(start='20170501', end='20170806')
@@ -64,19 +65,26 @@ dt_index = pd.date_range(start='20170802', end='20170806')
 dt_list=dt_index.strftime('%Y%m%d').tolist()
 point_=[]
 title_=[]
+a=[]
+b=[]
+c=[]
 url_base='https://movie.naver.com/movie/sdb/rank/rmovie.nhn?sel=cur&date='
 for date in dt_list:
     url=url_base+date
     page=urlopen(url)
     soup=BeautifulSoup(page,'html.parser')
-    title_.append(re.split(('\n|\r\n'),soup.find_all('div','tit5').get_text()))
-    point_.append(float(soup.find_all('td','point').get_text()))
+
+    for title_tag,point_tag in zip(soup.find_all('div','tit5'),soup.find_all('td','point')):
+        
+        if '택시운전사' in title_tag.get_text():
+            a.append(title_tag.get_text())
+            b.append(point_tag.get_text())
+            c.append(date)
+            
+            
+df=pd.DataFrame({'title':a,'point':b,'date':c})
+import matplotlib.pyplot as plt
+plt.plot(df['date'],df['point'])
+
 
     
-    
-    
-    
-    
-    title_.append(soup.find_all('a',href='/movie/bi/mi/basic.nhn?code=146469'))
-    point.append(float(soup.find_all('td','point')[i].get_text()))
-
