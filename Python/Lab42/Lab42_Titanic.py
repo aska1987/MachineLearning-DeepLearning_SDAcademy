@@ -73,6 +73,52 @@ Test_x_passengerData=test_data[:,[1, #Pclass
                               ]]
 Test_y_survived=test_sub[:,1:2] #Survived
 
+#placeholder
+x=tf.placeholder(tf.float32,shape=[None,5])
+y=tf.placeholder(tf.float32,shape=[None,1])
+
+#Variable
+W=tf.Variable(tf.random_normal([5,1]),name='weight')
+b=tf.Variable(tf.random_normal([1]),name='bias')
+
+#hypothesis sigmoid를 이용해 0-1 값으로 변경
+hypothesis=tf.sigmoid(tf.matmul(x,W)+b)       
+
+#cost, loss 결과값과 예측값의 차이: 작게 만드는 것이 학습
+#제곱오차, Cross_Entropy
+# Y=1, hypothesis=1  정답 -> tf.log(1) = 0에 가까워짐
+# Y=1, hypothesis=0  오답 -> tf.log(0) = 무한대에 가까워짐
+# Y=0, hypothesis=1  오답 -> tf.log(0) = 무한대에 가까워짐
+# Y=0, hypothesis=0  정답 -> tf.log(1) = 0에 가까워짐
+cost=-tf.reduce_mean(y*tf.log(hypothesis)+(1-y)*tf.log(1-hypothesis))
+
+#optimizer
+train=tf.train.GradientDescentOptimizer(0.1).minimize(cost)
 
 
-        
+predicted=tf.cast(hypothesis>0.5 , dtype=tf.float32)
+accuracy=tf.reduce_mean(tf.cast(tf.equal(predicted,y), dtype=tf.float32))
+
+#학습
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    
+    for step in range(10000):
+        cost_val,_=sess.run([cost,train],
+                            feed_dict={x:x_passengerData,
+                                       y:y_survived})
+        if step%500==0:
+            print('step=',step,'cost=',cost_val)
+#훈련데이터로 확인
+    h,c,a=sess.run([hypothesis,predicted,accuracy],
+                   feed_dict={x:x_passengerData,
+                              y:y_survived})
+    print('Accuracy: ',a)
+
+#테스트데이터로 확인
+    print('Test CSV runningResult')
+    h2,c2,a2=sess.run([hypothesis,predicted,accuracy],
+                      feed_dict={x:Test_x_passengerData,
+                                 y:Test_y_survived})
+    print('Accuracy: ',a2)
+
