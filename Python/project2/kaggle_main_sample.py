@@ -138,7 +138,7 @@ def generate_driver_based_split(img_to_driver, train_drivers):
                 cmd = cmd.format(train_path, label, img_path, temp_valid_fold, label, img_path)
                 valid_samples += 1
             # copy image
-            print('cmd:',cmd)
+            ##print('cmd:',cmd)
             subprocess.call(cmd, stderr=subprocess.STDOUT, shell=True)
     else:
         for label in labels:
@@ -154,7 +154,7 @@ def generate_driver_based_split(img_to_driver, train_drivers):
                     cmd = cmd.format(fl, temp_valid_fold, label, os.path.basename(fl))
                     valid_samples += 1
                 # 원본 훈련 데이터를 임시 훈련/검증 데이터에 복사한다
-                print('cmd:',cmd)
+                ##print('cmd:',cmd)
                 subprocess.call(cmd, stderr=subprocess.STDOUT, shell=True)
 
     # 훈련/검증 데이터 개수를 출력한다
@@ -239,14 +239,16 @@ for fold, (train_drivers, valid_drivers) in enumerate(kf):
             class_mode='categorical',
             seed=seed)
 
-    weight_path = '../cache/{}/weight.fold_{}.h5'.format(suffix, fold)
+    weight_path = 'C://Users/SDEDU/.kaggle/competitions/state-farm-distracted-driver-detection/cache/{}/weight.fold_{}.h5'.format(suffix, fold)
     callbacks = [EarlyStopping(monitor='val_loss', patience=3, verbose=0),
             ModelCheckpoint(weight_path, monitor='val_loss', save_best_only=True, verbose=0)]
     # 모델을 학습한다. val_loss 값이 3 epoch 연속 개악되면, 학습을 멈추고 최적 weight를 저장한다
     model.fit_generator(
             train_generator,
-            steps_per_epoch=train_samples/args.batch_size,
-            epochs=500,
+            steps_per_epoch=train_samples/(args.batch_size*50),
+            ##steps_per_epoch=train_samples/args.batch_size,
+            ##epochs=500,
+            epochs=3,
             validation_data=valid_generator,
             validation_steps=valid_samples/args.batch_size,
             shuffle=True,
