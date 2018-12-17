@@ -389,21 +389,121 @@ from keras.preprocessing.image import ImageDataGenerator
 datagen=ImageDataGenerator()
 #flow_from_directory() 함수를 통해 특정 폴더에 위치해있는 훈련/검증 데이터를 실시간으로 일겅온다
 train_generator=datagen.flow_from_directory(
-        directory='../input/train',
+        directory='C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train',
         target_size=(224,224),
         batch_size=8,
         class_mode='categorical',
         seed=2018)
 valid_generator=datagen.flow_from_directory(
-        directtory='../input/valid',
+        directtory='C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\valid',
         target_size=(224,224),
         batch_size=8,
         class_mode='categorical',
         seed=2018)
 #테스트 데이터 예측용 데이터 생성기를 정의한다
 test_generator=datagen.flow_from_directory(
-        directory='../input/test',
+        directory='C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\test',
         target_size=(224,224),
         batch_size=1,
         class_mode=None,
         shuffle=False)
+
+'''
+3. 교차 검증 평가 준비
+코드 5-23 
+교차 검증을 위하여 학습 데이터를훈련.검증 데이터로 분리하는 함수
+'''
+
+from glob import glob
+import numpy as np
+import subprocess
+import os
+def generate_split():
+    #이미지 생성기를 위하여 임시훈련/검증 폴더를 생성한다.
+    def _generate_temp_folder(root_path):
+        os.mkdir(root_path)
+        for i in range(n_class):
+            os.mkdir('{}/c{}'.format(root_path,i))
+        
+    _generate_temp_folder(temp_train_fold)
+    _generate_temp_folder(temp_valid_fold)
+    
+    #임시 훈련/검증 폴더에 데이터를 랜덤하게 복사 한다
+    train_samples=0
+    valid_samples=0
+    for label in labels:
+        files=glob('{}/{}/*jpg'.format(train_path,label))
+        for fl in files:
+            cmd='cp {} {}/{} {}'
+            #데이터의 4/5를 훈련데이터에 추가한다.
+            if np.random.randint(nfolds) !=1:
+                cmd=cmd.format(fl,temp_train_fold,label,os.path.basename(fl))
+                train_samples +=1
+            #데이터의 1/5를 검증데이터 추가
+        else:
+            cmd=cmd.format(fl,temp_valid_fold,label,os.path.basename(fl))
+        #원본 훈련 데이터를 임시 훈련/검증 데이터에 복사한다
+        subprocess.call(cmd, stderr=subprocess.STDOUT, shell=True)
+    #훈련/검증 데이터 개수를 출력한다
+    print('# {} train samples | {} valid samples'.format(train_samples, valid_samples))
+    return train_samples, valid_samples
+
+'''
+4. 모델 학습
+코드 5-24
+실제 모델 학습을 수행하는 코드.
+데이터를 불러오는 ImageDataGenerator()를 생성하고, 5번의 Fold 별로 새로운 모델을 생성하고,
+훈련/검증 데이터를 분리하고 fit_generator() 함수로 모델을 학습한다.
+'''
+
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+import pandas as pd
+import shutil
+
+print('Train Model')
+#이미지 데이터 전처리를 수행하는 함수를 정의한다.
+datagen=ImageDataGenerator()
+#테스트 데이터를 불러오는 ImageGenerator 를 생성한다.
+test_generator=datagen.flow_from_directory(
+        test_path,
+        target_size=(img_row_size, img_col_size),
+        batch_size=1,
+        class_mode=None,
+        shuffle=False)
+test_id=[os.path.basename(fl) for fl in glob('{}/imgs/*.jpg'.format(test_path))]
+
+#5-Flod 교차 검증을 진행한다
+nfolds=5
+for fold in range(nfolds):
+    #새로운 모델을 정의한다
+    model=get_model()
+    #훈련/검증 데이터를 생성한다.
+    train_samples, valid_samples=generate_split()
+    
+    #훈련/검증 데이터 생성기를 정의한다.
+    train_generator=datagen.flow_from_directory(
+            directory=temp_train_fold,
+            target_szie=(img_row_size,img_col_size),
+            batch_size=batch_size,
+            class_mode='categorical',
+            seed=seed)
+    valid_generator=datagen.flow_from_directory(
+            directory=temp_valid_fold,
+            target_size=(img_row_size,img_col_size),
+            batch_size=batch_size,
+            class_mode='categorical',
+            seed=seed)
+    weight_path='../cache/{}/mini_weight.fold_{}.h5'.format(suffix,i)
+    callbacks=[EarlyStopping(monitor='val_loss',patience=3,verbose=0),
+               ModelCheckpoint(weight_path,monitor='val_loss',save_best_only=True,verbose=0)]
+    #모델을 학습한다. val_loss 값이 3 epoch 연속 개악되면, 학습을 멈추고 최적 weight를 저장한다.
+    model.fit_generator(
+            train_generator,
+            steps_per_epoch=train_samples/args.batch_size,
+            epochs=500,
+            validation_data=valid_generator,
+            validation_steps=valid_samples/args.batch_size,
+            shuffle=True,
+            callbacks=callbacks,
+            verbose=1)
+    
