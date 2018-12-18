@@ -40,7 +40,7 @@ print(sklearn.__version__)
 fc_size = 2048
 n_class = 10
 seed = 10
-nfolds = 5
+nfolds = 3
 test_nfolds = 3
 img_row_size, img_col_size = 224, 224
 train_path = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train'
@@ -50,18 +50,34 @@ if args.semi_train is not None:
 test_path ='C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\test'
 labels = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9']
 
-suffix = 'm{}.w{}.lr{}.s{}.nf{}.semi{}.b{}.row{}col{}.rsplit{}.augment{}.d{}'.format(args.model, args.weights, args.learning_rate, seed, nfolds, args.semi_train, args.batch_size, img_row_size, img_col_size, args.random_split, args.data_augment, datetime.now().strftime("%Y-%m-%d-%H-%M"))
-temp_train_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train_{}'.format(suffix)
-temp_valid_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\valid_{}'.format(suffix)
-cache = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\cache\\{}'.format(suffix)
-subm = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\subm\\{}'.format(suffix)
+
 
 def _clear_dir(path):
     if os.path.exists(path):
         shutil.rmtree(path)
     os.mkdir(path)
-for path in [temp_train_fold, temp_valid_fold, cache, subm]:
-    _clear_dir(path)
+
+text=int(input('1. 이미지 새로 생성 2. 기존 이미지 \n' ))
+if text==1:
+    suffix = 'm{}.w{}.lr{}.s{}.nf{}.semi{}.b{}.row{}col{}.rsplit{}.augment{}.d{}'.format(args.model, args.weights, args.learning_rate, seed, nfolds, args.semi_train, args.batch_size, img_row_size, img_col_size, args.random_split, args.data_augment, datetime.now().strftime("%Y-%m-%d-%H-%M"))
+    temp_train_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train_{}'.format(suffix)
+    temp_valid_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\valid_{}'.format(suffix)
+    cache = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\cache\\{}'.format(suffix)
+    subm = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\subm\\{}'.format(suffix)
+
+    for path in [temp_train_fold, temp_valid_fold, cache, subm]:
+        _clear_dir(path)
+
+    
+elif text==2:       
+    date_text=input('원하는 날짜의 데이터 입력(ex 2018-12-18-12-22) : \n')
+    
+    #suffix = 'mvgg16.wNone.lr0.0001.s10.nf5.semiNone.b8.row224col224.rsplit1.augment0.d2018-12-18-12-21'
+    suffix = 'mvgg16.wNone.lr0.0001.s10.nf5.semiNone.b8.row224col224.rsplit1.augment0.d'+date_text
+    temp_train_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train_{}'.format(suffix)
+    temp_valid_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\valid_{}'.format(suffix)
+    cache = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\cache\\{}'.format(suffix)
+    subm = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\subm\\{}'.format(suffix)
 
 def get_model():
     print('line 67! get model')
@@ -203,7 +219,7 @@ print('# Train Model')
 if args.data_augment:
     datagen = ImageDataGenerator(preprocessing_function=preprocess)
 else:
-    datagen = ImageDataGenerator()
+    datagen = ImageDataGenerator() # 데이터를 이리저리 변형시켜서 새로운 학습 데이터를 만들어줌
 
 # 테스트 데이터를 불러오는 ImageGenerator를 생성한다
 test_generator = datagen.flow_from_directory(
@@ -223,7 +239,15 @@ for fold, (train_drivers, valid_drivers) in enumerate(kf):
     # 훈련/검증 데이터를 생성한다
     print('line 217!')
     train_drivers = [uniq_drivers[j] for j in train_drivers]
-    train_samples, valid_samples = generate_driver_based_split(img_to_driver, train_drivers)
+    ####train_samples, valid_samples = generate_driver_based_split(img_to_driver, train_drivers)
+    
+
+    if text==1:
+        train_samples, valid_samples = generate_driver_based_split(img_to_driver, train_drivers)
+    
+    elif text==2:
+        train_samples=17909
+        valid_samples=4515
 
     # 훈련/검증 데이터 생성기를 정의한다
     train_generator = datagen.flow_from_directory(
@@ -242,7 +266,11 @@ for fold, (train_drivers, valid_drivers) in enumerate(kf):
     weight_path = 'C://Users/SDEDU/.kaggle/competitions/state-farm-distracted-driver-detection/cache/{}/weight.fold_{}.h5'.format(suffix, fold)
     callbacks = [EarlyStopping(monitor='val_loss', patience=3, verbose=0),
             ModelCheckpoint(weight_path, monitor='val_loss', save_best_only=True, verbose=0)]
-    # 모델을 학습한다. val_loss 값이 3 epoch 연속 개악되면, 학습을 멈추고 최적 weight를 저장한다
+    # 모델을 학습한다. val_loss 값이 3 epoch 연속 개악되면, 학습을 멈추고 최적 weight를 저장한다 
+    #EarlyStopping: 조기학습 중단
+    #patience: 개선이 없다고 바로 종료하지 않고 개선이 없는 epoch를 얼마나 기다려줄것인지 정함. ex) 10이라고 지정하면 개선이 없는 epoch가 10번째 지속될 경우 학습 종료
+    # https://tykimos.github.io/2017/07/09/Early_Stopping/ 참조
+    
     model.fit_generator(
             train_generator,
             steps_per_epoch=train_samples/(args.batch_size*50),
