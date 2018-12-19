@@ -40,7 +40,7 @@ print(sklearn.__version__)
 fc_size = 2048
 n_class = 10
 seed = 10
-nfolds = 3
+nfolds = 2
 test_nfolds = 3
 img_row_size, img_col_size = 224, 224
 train_path = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train'
@@ -59,7 +59,11 @@ def _clear_dir(path):
 
 text=int(input('1. 이미지 새로 생성 2. 기존 이미지 \n' ))
 if text==1:
-    suffix = 'm{}.w{}.lr{}.s{}.nf{}.semi{}.b{}.row{}col{}.rsplit{}.augment{}.d{}'.format(args.model, args.weights, args.learning_rate, seed, nfolds, args.semi_train, args.batch_size, img_row_size, img_col_size, args.random_split, args.data_augment, datetime.now().strftime("%Y-%m-%d-%H-%M"))
+    suffix = 'm{}.w{}.lr{}.s{}.nf{}.semi{}.b{}.row{}col{}.rsplit{}.augment{}.d{}'.format(
+            args.model, args.weights, args.learning_rate, seed, nfolds,
+            args.semi_train, args.batch_size, img_row_size, img_col_size,
+            args.random_split, args.data_augment,
+            datetime.now().strftime("%Y-%m-%d-%H-%M"))
     temp_train_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train_{}'.format(suffix)
     temp_valid_fold = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\valid_{}'.format(suffix)
     cache = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\cache\\{}'.format(suffix)
@@ -132,9 +136,11 @@ def generate_driver_based_split(img_to_driver, train_drivers):
     print('line 116 split')
     # 이미지 생성기를 위하여 임시 훈련/검증 폴더를 생성한다
     def _generate_temp_folder(root_path):
+        print('_generate_temp_folder')
         _clear_dir(root_path)
         for i in range(n_class):
             os.mkdir('{}/c{}'.format(root_path, i))
+            print('root_path:',root_path)
     _generate_temp_folder(temp_train_fold)
     _generate_temp_folder(temp_valid_fold)
 
@@ -142,6 +148,7 @@ def generate_driver_based_split(img_to_driver, train_drivers):
     train_samples = 0
     valid_samples = 0
     if not args.random_split:
+        print('147 line random_split')
         for img_path in img_to_driver.keys():
             cmd = 'copy {}\\{}\{} {}\{}\{}'
             label = img_to_driver[img_path]['label']
@@ -149,6 +156,7 @@ def generate_driver_based_split(img_to_driver, train_drivers):
                 continue
             if img_to_driver[img_path]['driver'] in train_drivers:
                 cmd = cmd.format(train_path, label, img_path, temp_train_fold, label, img_path)
+                
                 train_samples += 1
             else:
                 cmd = cmd.format(train_path, label, img_path, temp_valid_fold, label, img_path)
@@ -157,6 +165,7 @@ def generate_driver_based_split(img_to_driver, train_drivers):
             ##print('cmd:',cmd)
             subprocess.call(cmd, stderr=subprocess.STDOUT, shell=True)
     else:
+        print('163 line not random_split')
         for label in labels:
             files = glob('{}\{}\*jpg'.format(train_path, label))
             for fl in files:
@@ -233,6 +242,7 @@ test_id = [os.path.basename(fl) for fl in glob('{}/imgs/*.jpg'.format(test_path)
 # 운전자별 5-Fold 교차 검증을 진행한다
 kf = KFold(len(uniq_drivers), n_folds=nfolds, shuffle=True, random_state=20)
 for fold, (train_drivers, valid_drivers) in enumerate(kf):
+    print(fold,train_drivers,valid_drivers)
     # 새로운 모델을 정의한다
     model = get_model()
 
@@ -285,6 +295,7 @@ for fold, (train_drivers, valid_drivers) in enumerate(kf):
 
     # 테트스 테이터에 실시간 전처리를 수행하여 n번 예측한 결과값의 평균을 최종 예측값으로 사용한다
     for j in range(test_nfolds):
+        print('line 292 test_nfolds',test_nfolds)
         preds = model.predict_generator(
                 test_generator,
                 steps=len(test_id),
@@ -294,14 +305,15 @@ for fold, (train_drivers, valid_drivers) in enumerate(kf):
             result = pd.DataFrame(preds, columns=labels)
         else:
             result += pd.DataFrame(preds, columns=labels)
+    print('302 line')
     result /= test_nfolds
     result.loc[:, 'img'] = pd.Series(test_id, index=result.index)
-    sub_file = '../subm/{}/f{}.csv'.format(suffix, fold)
+    sub_file = 'C:\\Users\SDEDU\.kaggle\competitions\state-farm-distracted-driver-detection\subm\{}/f{}.csv'.format(suffix, fold)
     result.to_csv(sub_file, index=False)
 
     # 캐글에 제출한다
-    #submit_cmd = 'kaggle competitions submit -c state-farm-distracted-driver-detection -f {} -m {}.fold{}'.format(sub_file, suffix, fold)
-    #subprocess.call(submit_cmd, stderr=subprocess.STDOUT, shell=True)
+    submit_cmd = 'kaggle competitions submit -c state-farm-distracted-driver-detection -f {} -m {}.fold{}'.format(sub_file, suffix, fold)
+    subprocess.call(submit_cmd, stderr=subprocess.STDOUT, shell=True)
 
     # 5-Fold 교차 검증 과정에서 생성한 훈련/검증 데이터를 삭제한다
     shutil.rmtree(temp_train_fold)
@@ -311,12 +323,12 @@ print('# Ensemble')
 # 5-Fold 교차 검증의 결과물을 단순 앙상블한다
 ensemble = 0
 for fold in range(nfolds):
-    ensemble += pd.read_csv('../subm/{}/f{}.csv'.format(suffix, fold), index_col=-1).values * 1. / nfolds
+    ensemble += pd.read_csv('C:\\Users\SDEDU\.kaggle\competitions\state-farm-distracted-driver-detection\subm\{}/f{}.csv'.format(suffix, fold), index_col=-1).values * 1. / nfolds
 ensemble = pd.DataFrame(ensemble, columns=labels)
 ensemble.loc[:, 'img'] = pd.Series(test_id, index=ensemble.index)
-sub_file = '../subm/{}/ens.csv'.format(suffix)
+sub_file = 'C:\\Users\SDEDU\.kaggle\competitions\state-farm-distracted-driver-detection\subm\{}\ens.csv'.format(suffix)
 ensemble.to_csv(sub_file, index=False)
 
 # 캐글에 제출한다
-#submit_cmd = 'kaggle competitions submit -c state-farm-distracted-driver-detection -f {} -m {}'.format(sub_file, suffix)
-#subprocess.call(submit_cmd, stderr=subprocess.STDOUT, shell=True)
+submit_cmd = 'kaggle competitions submit -c state-farm-distracted-driver-detection -f {} -m {}'.format(sub_file, suffix)
+subprocess.call(submit_cmd, stderr=subprocess.STDOUT, shell=True)
