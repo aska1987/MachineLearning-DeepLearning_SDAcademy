@@ -40,7 +40,7 @@ print(sklearn.__version__)
 fc_size = 2048
 n_class = 10
 seed = 10
-nfolds = 2
+nfolds = 5
 test_nfolds = 3
 img_row_size, img_col_size = 224, 224
 train_path = 'C:\\Users\\SDEDU\\.kaggle\\competitions\\state-farm-distracted-driver-detection\\input\\train'
@@ -240,9 +240,10 @@ test_generator = datagen.flow_from_directory(
 test_id = [os.path.basename(fl) for fl in glob('{}/imgs/*.jpg'.format(test_path))]
 
 # 운전자별 5-Fold 교차 검증을 진행한다
-kf = KFold(len(uniq_drivers), n_folds=nfolds, shuffle=True, random_state=20)
+kf = KFold(len(uniq_drivers), n_folds=nfolds, shuffle=True, random_state=20)#원본
+#kf = KFold(len(uniq_drivers), n_folds=2, shuffle=True, random_state=20) #수정본 -->  n폴드갯수 지정
+
 for fold, (train_drivers, valid_drivers) in enumerate(kf):
-    print(fold,train_drivers,valid_drivers)
     # 새로운 모델을 정의한다
     model = get_model()
 
@@ -283,10 +284,10 @@ for fold, (train_drivers, valid_drivers) in enumerate(kf):
     
     model.fit_generator(
             train_generator,
-            steps_per_epoch=train_samples/(args.batch_size*50),
+            steps_per_epoch=train_samples/(args.batch_size),
             ##steps_per_epoch=train_samples/args.batch_size,
             ##epochs=500,
-            epochs=3,
+            epochs=500,
             validation_data=valid_generator,
             validation_steps=valid_samples/args.batch_size,
             shuffle=True,
@@ -316,13 +317,14 @@ for fold, (train_drivers, valid_drivers) in enumerate(kf):
     subprocess.call(submit_cmd, stderr=subprocess.STDOUT, shell=True)
 
     # 5-Fold 교차 검증 과정에서 생성한 훈련/검증 데이터를 삭제한다
-    shutil.rmtree(temp_train_fold)
-    shutil.rmtree(temp_valid_fold)
+    #shutil.rmtree(temp_train_fold)
+    #shutil.rmtree(temp_valid_fold)
 
 print('# Ensemble')
 # 5-Fold 교차 검증의 결과물을 단순 앙상블한다
 ensemble = 0
-for fold in range(nfolds):
+for fold in range(nfolds): #원본 
+#for fold in range(nfolds): #수정본 --> 위에서 지정해준 nfolds갯수 지정
     ensemble += pd.read_csv('C:\\Users\SDEDU\.kaggle\competitions\state-farm-distracted-driver-detection\subm\{}/f{}.csv'.format(suffix, fold), index_col=-1).values * 1. / nfolds
 ensemble = pd.DataFrame(ensemble, columns=labels)
 ensemble.loc[:, 'img'] = pd.Series(test_id, index=ensemble.index)
